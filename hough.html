@@ -1,0 +1,227 @@
+<head>
+
+
+</head>
+
+<body>
+
+	<canvas id="myCanvas" width="640" height="640" style="background-color:white;"></canvas>
+	<canvas id="houghCanvas" width="640" height="640" style="background-color:black;"></canvas>
+
+
+	<script>
+	/*
+		Canvas & Context
+	*/
+	var canvas = document.getElementById('myCanvas');
+	var context = canvas.getContext('2d');
+
+
+	var hCanvas = document.getElementById('houghCanvas');
+	var hContext = hCanvas.getContext('2d');
+	hContext.scale(2,2);
+
+
+	var image = new Image();
+	image.src = "wiki.png";
+
+	/* 
+		Image width
+	*/
+	var imageWidth = 362;
+
+	/*
+		Image height
+	*/
+	var imageHeight = 414;
+
+	/*
+		Accumulator
+	*/
+	var A = [];
+	var FA = [];
+
+
+	/*
+		Holds image data for the accumulator
+	*/
+	var ImageDataA = [];
+
+	/*
+		Flipped A
+	*/
+	var FlippedA = []; 
+
+	/*
+		Maximum value rho can have, range is [-maxRho,maxRho]
+	*/
+	var maxRho = Math.floor(Math.sqrt((imageWidth*imageWidth) + (imageHeight*imageHeight)));
+
+	var totalDegrees = 180 + 1;
+
+	/*
+		Create accumulator dimensions
+			Theta - x axis
+			Rho - y axis
+	*/
+	for(var i = 0; i < (maxRho*2)+1; i++){
+		A[i] = new Array(totalDegrees);
+		FA[i] = new Array(totalDegrees);
+	}
+
+	/*
+		Set values inside the accumulator to 0
+	*/
+	for(var y = 0; y <  (maxRho*2)+1; y++){
+		for(var x = 0; x < totalDegrees; x++){
+			A[y][x] = 0;
+		}
+	}
+
+	/* 
+		Set canvas
+	*/
+	canvas.width = imageWidth;
+	canvas.height = imageHeight;
+
+	hCanvas.width = totalDegrees;
+	hCanvas.height = (maxRho*2)+1;
+	// hCanvas.width = (maxRho*2)+1;
+	// hCanvas.height = totalDegrees;
+
+
+	/*
+		Hough transform function
+	*/
+	function HoughTransform(){
+		/*
+			Clear canvas
+		*/
+		context.clearRect(0,0, canvas.width, canvas.height);
+		hContext.clearRect(0,0, hCanvas.width, hCanvas.height);
+
+		/*
+			Draw original image
+		*/
+		context.drawImage(image,0,0);
+
+
+		/*
+			Creating image data with dimensions to draw the hough transform graph
+		*/
+		ImageDataA = hContext.createImageData(totalDegrees,maxRho*2 + 1);
+
+
+		FlippedImageDataA = hContext.createImageData(maxRho*2+1, totalDegrees);
+
+
+		/*
+			Get image Data from original
+		*/
+		OriginalImageData = context.getImageData(0,0,imageWidth,imageHeight);
+
+		/*
+			Variables for the for loop
+		*/
+		var currentColor;
+		var theta;
+		var rho;
+		var indexRho;
+
+		for(var y = 0; y < imageHeight; y++){
+			for(var x = 0; x < imageWidth; x++){
+
+				currentColor = OriginalImageData.data[( (imageWidth * y) + x ) * 4 ];
+
+				if(currentColor === 0){
+					for(var t = 0; t <= 180; t++){
+						theta = t * Math.PI/180;
+
+						rho = x * Math.cos(theta) + y * Math.sin(theta); 
+						if(rho >= 0 ){
+							rho = Math.floor(rho);
+						}else{
+							rho = Math.ceil(rho);
+						}
+
+						indexRho = rho + maxRho;
+
+						A[indexRho][t] += 1;
+
+					}
+				}
+
+			}
+		}
+
+		var highestValue = 0;
+		var rt = {rho: 0, theta: 0 };
+
+
+		for(var y = 0; y < (maxRho*2)+1; y++){
+			for(var x = 0; x < totalDegrees; x++){
+				if(A[y][x] > highestValue){
+					highestValue = A[y][x];
+					rt.rho = y - maxRho;
+					rt.theta = 180 - x;
+				}
+			}
+		}
+
+		var extraBrightness = 5;
+
+		FlippedA = A[0].map(function(col, i) { 
+		  return A.map(function(row) { 
+		    return row[i] 
+		  })
+		});
+
+
+
+		for(var x = 0; x < (maxRho*2)+1; x++){
+			for(var y = 0; y < totalDegrees; y++){
+
+					FA[((maxRho*2)+1) -x - 1][y] = A[x][y];
+			}		
+		}
+
+		// for(var y = 0; y < totalDegrees; y++){
+		// 	for(var x = 0; x < (maxRho*2)+1; x++){
+		// 		FlippedImageDataA.data[( (((maxRho*2)+1) * y) + x ) * 4 ]    = FlippedA[y][x]*(x+y*extraBrightness)/highestValue;
+		// 		FlippedImageDataA.data[( (((maxRho*2)+1) * y) + x ) * 4 + 1] = FlippedA[y][x]*(x+y*extraBrightness)/highestValue;
+		// 		FlippedImageDataA.data[( (((maxRho*2)+1) * y) + x ) * 4 + 2] = FlippedA[y][x]*(x+y*extraBrightness)/highestValue;
+		// 		FlippedImageDataA.data[( (((maxRho*2)+1) * y) + x ) * 4 + 3] = 255;
+		// 	}
+		// }
+
+		for(var y = 0; y < (maxRho*2)+1; y++){
+			for(var x = 0; x < totalDegrees; x++){
+				ImageDataA.data[( (totalDegrees * y) + x ) * 4 ]    = FA[y][x]*(x+y*extraBrightness)/highestValue;
+				ImageDataA.data[( (totalDegrees * y) + x ) * 4 + 1] = FA[y][x]*(x+y*extraBrightness)/highestValue;
+				ImageDataA.data[( (totalDegrees * y) + x ) * 4 + 2] = FA[y][x]*(x+y*extraBrightness)/highestValue;
+				ImageDataA.data[( (totalDegrees * y) + x ) * 4 + 3] = 255;
+			}
+		}
+
+
+		hContext.putImageData(ImageDataA,0,0);
+	/*
+		End of Function
+	*/
+	}
+
+
+
+
+	/*
+		Checking if image is loaded
+	*/
+
+	image.onload = function(){
+		HoughTransform();
+	}
+
+	</script>
+
+
+</body>
