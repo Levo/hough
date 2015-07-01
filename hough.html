@@ -152,7 +152,6 @@
 		var theta;
 		var rho;
 		var indexRho;
-		var indexTheta;
 
 		for(var y = 0; y < imageHeight; y++){
 			for(var x = 0; x < imageWidth; x++){
@@ -166,7 +165,7 @@
 					If the pixel is black, or switch it to white for sobel edge detection
 				*/
 				if(currentColor === 0){
-					for(var t = -90; t <= 90; t++){
+					for(var t = 0; t <= 180; t++){
 						theta = t * Math.PI/180;
 
 						rho = x * Math.cos(theta) + y * Math.sin(theta); 
@@ -177,9 +176,8 @@
 						}
 
 						indexRho = rho + maxRho;
-						indexTheta = t + 90;
 
-						A[indexRho][indexTheta] += 1;
+						A[indexRho][t] += 1;
 
 					}
 				}
@@ -199,12 +197,11 @@
 				if(A[y][x] > highestValue){
 					highestValue = A[y][x];
 					rt.rho = y - maxRho;
-					rt.theta = x - 90;
+					rt.theta = 180 - x;
 				}
 			}
 		}
 
-		console.log(rt.theta);
 
 		var extraBrightness = brightness;
 
@@ -214,7 +211,7 @@
 		for(var x = 0; x < (maxRho*2)+1; x++){
 			for(var y = 0; y < totalDegrees; y++){
 
-					FA[((maxRho*2)+1) -x - 1][totalDegrees - y - 1] = A[x][y];
+					FA[((maxRho*2)+1) -x - 1][y] = A[x][y];
 			}		
 		}
 
