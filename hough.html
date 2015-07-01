@@ -7,7 +7,8 @@
 
 	<canvas id="myCanvas" width="640" height="640" style="background-color:white;"></canvas>
 	<canvas id="houghCanvas" width="640" height="640" style="background-color:black;"></canvas>
-
+	Brightness
+	<input type="range" min="1" max="25" value="3.0" step="1" onchange="HoughTransform(this.value)"/> 
 
 	<script>
 	/*
@@ -23,7 +24,7 @@
 		Image for hough transform
 	*/
 	var image = new Image();
-	image.src = "wiki.png";
+	image.src = "Pentagon.png";
 
 	/* 
 		Declaring Variables
@@ -117,7 +118,7 @@
 	/*
 		Hough transform function
 	*/
-	function HoughTransform(){
+	function HoughTransform(brightness){
 		/*
 			Clear canvas
 		*/
@@ -202,7 +203,7 @@
 		}
 
 
-		var extraBrightness = 3.0;
+		var extraBrightness = brightness;
 
 		/* 
 			Flipping upside down for correct orientation
@@ -240,7 +241,7 @@
 		/* run setup*/
 		setup();
 		/* hough transform*/
-		HoughTransform();
+		HoughTransform(3.0);
 	}
 
 	</script>
