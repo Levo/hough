@@ -16,78 +16,102 @@
 	var canvas = document.getElementById('myCanvas');
 	var context = canvas.getContext('2d');
 
-
 	var hCanvas = document.getElementById('houghCanvas');
 	var hContext = hCanvas.getContext('2d');
-	hContext.scale(2,2);
 
-
+	/*
+		Image for hough transform
+	*/
 	var image = new Image();
 	image.src = "wiki.png";
 
 	/* 
-		Image width
+		Declaring Variables
 	*/
-	var imageWidth = 362;
-
-	/*
-		Image height
-	*/
-	var imageHeight = 414;
-
+	var imageWidth;
+	var imageHeight;
 	/*
 		Accumulator
 	*/
 	var A = [];
 	var FA = [];
-
-
 	/*
 		Holds image data for the accumulator
 	*/
 	var ImageDataA = [];
 
 	/*
-		Flipped A
+		max rho
 	*/
-	var FlippedA = []; 
+	var maxRho;
+	/*
+		max degrees
+	*/
+	var totalDegrees;
+
+
 
 	/*
-		Maximum value rho can have, range is [-maxRho,maxRho]
+		Setup function once photo is loaded
 	*/
-	var maxRho = Math.floor(Math.sqrt((imageWidth*imageWidth) + (imageHeight*imageHeight)));
+	function setup(){
+		/* 
+			Image width
+		*/
+		imageWidth = image.width;
 
-	var totalDegrees = 180 + 1;
+		/*
+			Image height
+		*/
+		imageHeight = image.height;
 
-	/*
-		Create accumulator dimensions
-			Theta - x axis
-			Rho - y axis
-	*/
-	for(var i = 0; i < (maxRho*2)+1; i++){
-		A[i] = new Array(totalDegrees);
-		FA[i] = new Array(totalDegrees);
-	}
 
-	/*
-		Set values inside the accumulator to 0
-	*/
-	for(var y = 0; y <  (maxRho*2)+1; y++){
-		for(var x = 0; x < totalDegrees; x++){
-			A[y][x] = 0;
+		/*
+			Maximum value rho can have, range is [-maxRho,maxRho]
+		*/
+		maxRho = Math.floor(Math.sqrt((imageWidth*imageWidth) + (imageHeight*imageHeight)));
+
+		/*
+			Maximum value theta can have, range is [0,180]
+		*/
+		totalDegrees = 180 + 1;
+
+		/*
+			Create accumulator dimensions
+				Theta - x axis
+				Rho - y axis
+		*/
+		for(var i = 0; i < (maxRho*2)+1; i++){
+			A[i] = new Array(totalDegrees);
+			FA[i] = new Array(totalDegrees);
 		}
+
+		/*
+			Set values inside the accumulator to 0
+		*/
+		for(var y = 0; y <  (maxRho*2)+1; y++){
+			for(var x = 0; x < totalDegrees; x++){
+				A[y][x] = 0;
+			}
+		}
+
+		/* 
+			Set canvas
+		*/
+		canvas.width = imageWidth;
+		canvas.height = imageHeight;
+
+		/*
+			Rotated image
+		*/
+		hCanvas.width = totalDegrees;
+		hCanvas.height = (maxRho*2)+1;
+		// hCanvas.width = (maxRho*2)+1;
+		// hCanvas.height = totalDegrees;
+
+
 	}
 
-	/* 
-		Set canvas
-	*/
-	canvas.width = imageWidth;
-	canvas.height = imageHeight;
-
-	hCanvas.width = totalDegrees;
-	hCanvas.height = (maxRho*2)+1;
-	// hCanvas.width = (maxRho*2)+1;
-	// hCanvas.height = totalDegrees;
 
 
 	/*
@@ -131,8 +155,14 @@
 		for(var y = 0; y < imageHeight; y++){
 			for(var x = 0; x < imageWidth; x++){
 
+				/*
+					Get the current pixel color
+				*/
 				currentColor = OriginalImageData.data[( (imageWidth * y) + x ) * 4 ];
 
+				/*
+					If the pixel is black, or switch it to white for sobel edge detection
+				*/
 				if(currentColor === 0){
 					for(var t = 0; t <= 180; t++){
 						theta = t * Math.PI/180;
@@ -158,6 +188,9 @@
 		var rt = {rho: 0, theta: 0 };
 
 
+		/*
+			Find the largest accumulator bin
+		*/
 		for(var y = 0; y < (maxRho*2)+1; y++){
 			for(var x = 0; x < totalDegrees; x++){
 				if(A[y][x] > highestValue){
@@ -168,16 +201,12 @@
 			}
 		}
 
-		var extraBrightness = 5;
 
-		FlippedA = A[0].map(function(col, i) { 
-		  return A.map(function(row) { 
-		    return row[i] 
-		  })
-		});
+		var extraBrightness = 3.0;
 
-
-
+		/* 
+			Flipping upside down for correct orientation
+		*/
 		for(var x = 0; x < (maxRho*2)+1; x++){
 			for(var y = 0; y < totalDegrees; y++){
 
@@ -185,15 +214,9 @@
 			}		
 		}
 
-		// for(var y = 0; y < totalDegrees; y++){
-		// 	for(var x = 0; x < (maxRho*2)+1; x++){
-		// 		FlippedImageDataA.data[( (((maxRho*2)+1) * y) + x ) * 4 ]    = FlippedA[y][x]*(x+y*extraBrightness)/highestValue;
-		// 		FlippedImageDataA.data[( (((maxRho*2)+1) * y) + x ) * 4 + 1] = FlippedA[y][x]*(x+y*extraBrightness)/highestValue;
-		// 		FlippedImageDataA.data[( (((maxRho*2)+1) * y) + x ) * 4 + 2] = FlippedA[y][x]*(x+y*extraBrightness)/highestValue;
-		// 		FlippedImageDataA.data[( (((maxRho*2)+1) * y) + x ) * 4 + 3] = 255;
-		// 	}
-		// }
-
+		/* 
+			Setting pixel data for the accumulator graph
+		*/
 		for(var y = 0; y < (maxRho*2)+1; y++){
 			for(var x = 0; x < totalDegrees; x++){
 				ImageDataA.data[( (totalDegrees * y) + x ) * 4 ]    = FA[y][x]*(x+y*extraBrightness)/highestValue;
@@ -203,21 +226,20 @@
 			}
 		}
 
-
+		/*
+			Draw the accumulator graph
+		*/
 		hContext.putImageData(ImageDataA,0,0);
-	/*
-		End of Function
-	*/
 	}
-
-
 
 
 	/*
 		Checking if image is loaded
 	*/
-
 	image.onload = function(){
+		/* run setup*/
+		setup();
+		/* hough transform*/
 		HoughTransform();
 	}
 
