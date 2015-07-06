@@ -22,7 +22,7 @@ function findPeaks(){
 
 			C = FA[y][x];
 			if(C >= threshold){
-				
+
 				N  = FA[y-1][x];
 				NE = FA[y-1][x+1];
 				NW = FA[y-1][x-1];
@@ -60,8 +60,8 @@ function findPeaks(){
 	}
 
 
-	console.log(peaks.length);
-
+	// console.log(peaks.length);
+	console.log(peaks);
 
 	return peaks;
 	

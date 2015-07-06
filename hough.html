@@ -17,7 +17,9 @@
 	/* 
 		Random threshold for peaks detection?
 	*/
-	var threshold = 250;
+	var threshold = 0;
+
+	var BorW = 255;
 
 	/*
 		Canvas & Context
@@ -32,7 +34,7 @@
 		Image for hough transform
 	*/
 	var image = new Image();
-	image.src = "wiki.png";
+	image.src = "edges.png";
 
 	/* 
 		Declaring Variables
@@ -172,7 +174,7 @@
 				/*
 					If the pixel is black, or switch it to white for sobel edge detection
 				*/
-				if(currentColor === 0){
+				if(currentColor === BorW){
 					for(var t = 0; t <= 180; t++){
 						theta = t * Math.PI/180;
 
