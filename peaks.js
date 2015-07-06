@@ -5,6 +5,10 @@ function findPeaks(){
 	var W = 0; 
 	var S = 0; 
 	var C = 0;
+	var NE = 0;
+	var NW = 0;
+	var SW = 0;
+	var SE = 0;
 
 	var peaks = [];
 	var peakCount = 0;
@@ -17,13 +21,19 @@ function findPeaks(){
 		for(var x = 1; x < totalDegrees-1; x++){
 
 			C = FA[y][x];
-			if(C >= 300){
-				N = FA[y-1][x];
-				E = FA[y][x+1];
-				W = FA[y][x-1];
-				S = FA[y+1][x];
+			if(C >= threshold){
+				
+				N  = FA[y-1][x];
+				NE = FA[y-1][x+1];
+				NW = FA[y-1][x-1];
+				E  = FA[y][x+1];
+				W  = FA[y][x-1];
+				S  = FA[y+1][x];
+				SE = FA[y+1][x+1];
+				SW = FA[y+1][x-1];
 
-				if(W <= C && N <= C && E <= C && S <= C){
+
+				if(W <= C && N <= C && E <= C && S <= C  && SE <= C && SW <= C && NE <= C && NW <= C){
 					var rt = {rho: 0, theta: 0};
 					rt.rho = y - maxRho;
 					rt.theta = x;
@@ -50,7 +60,7 @@ function findPeaks(){
 	}
 
 
-	console.log(peaks);
+	console.log(peaks.length);
 
 
 	return peaks;
