@@ -1,5 +1,5 @@
 <head>
-
+<script type="text/javascript" src="peaks.js"></script>
 
 </head>
 
@@ -9,6 +9,8 @@
 	<canvas id="houghCanvas" width="640" height="640" style="background-color:black;"></canvas>
 	Brightness
 	<input type="range" min="1" max="25" value="3.0" step="1" onchange="HoughTransform(this.value)"/> 
+	<button id="findPeaks" onclick="findPeaks()">peaks</button>
+
 
 	<script>
 	/*
@@ -24,7 +26,7 @@
 		Image for hough transform
 	*/
 	var image = new Image();
-	image.src = "Pentagon.png";
+	image.src = "wiki.png";
 
 	/* 
 		Declaring Variables
@@ -202,6 +204,7 @@
 			}
 		}
 
+		// console.log(rt);
 
 		var extraBrightness = brightness;
 
