@@ -1,26 +1,38 @@
 <head>
 <script type="text/javascript" src="peaks.js"></script>
+<script type="text/javascript" src="examples.js"></script>
 </head>
 
 <body>
 
 	<canvas id="myCanvas" width="640" height="640" style="background-color:white;"></canvas>
 	<canvas id="houghCanvas" width="640" height="640" style="background-color:black;"></canvas>
-	<button id="findPeaks" onclick="findPeaks()">peaks</button>
+		<button id="findPeaks" onclick="findPeaks()">peaks</button>
 
+    	<select id="dropDownListPictures" onchange="newImage(this)">
+	      <option value=shape>shape</option>
+	      <option value=wiki>wiki</option>
+	      <option value=pentagon>pentagon</option>
+	      <option value=cross>cross</option>
+   		</select>
 
 	<script>
 
 	/* 
 		Random threshold for peaks detection?
 	*/
-	var threshold = 25;
+	var threshold = 45;
+
+	/*
+		Hough graph brightness
+	*/
+	var bright = 7.0;
 
 	/*
 		0   - for black edges
 		255 - for white edges
 	*/
-	var BorW = 255;
+	var BorW = 0;
 
 	/*
 		Canvas & Context
@@ -35,7 +47,7 @@
 		Image for hough transform
 	*/
 	var image = new Image();
-	image.src = "shape.gif";
+	image.src = "cross.png";
 
 	/* 
 		Declaring Variables
@@ -61,6 +73,25 @@
 	*/
 	var totalDegrees;
 
+
+
+	function newImage(img){
+		img = images[img.value];
+		image = new Image();
+		image.src = img.fileName;
+		A = [];
+		FA = [];
+		ImageDataA = [];
+		threshold = img.threshold;
+		BorW = img.BorW;
+		image.onload = function(){
+			/* run setup*/
+			setup();
+			/* hough transform*/
+			HoughTransform(bright);
+		}
+
+	}
 
 
 	/*
@@ -213,7 +244,6 @@
 			}
 		}
 
-		// console.log(rt);
 
 		var extraBrightness = brightness;
 
@@ -253,7 +283,7 @@
 		/* run setup*/
 		setup();
 		/* hough transform*/
-		HoughTransform(3.0);
+		HoughTransform(bright);
 	}
 
 	</script>

@@ -61,7 +61,7 @@ function findPeaks(){
 
 
 	// console.log(peaks.length);
-	console.log(peaks);
+	// console.log(peaks);
 
 	return peaks;
 	
